@@ -2,9 +2,12 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 public class PA2Main {
 
@@ -22,68 +25,76 @@ public class PA2Main {
 
         // Stores the HashMap created by countDepartures for later printing
         //HashMap<String, Integer> flights;
-        
-        
-          if (args[1].equals("MAX")) {
-          HashMap<String, Integer> flights = countMax(in);
-          ArrayList<String> airportsSorted = new ArrayList<String>(
-          flights.keySet());
-          Collections.sort(airportsSorted);
+        calcPrint(args, in);
 
+    }
+
+    public static void calcPrint(String[] args, Scanner in) {
+        if (args[1].equals("MAX")) {
+            HashMap<String, Integer> flights = countMax(in, args);
+            ArrayList<String> airportsSorted = new ArrayList<String>(
+                    flights.keySet());
+            Collections.sort(airportsSorted);
             double max = 1;
             for (String airport : airportsSorted) {
                 if (Double.valueOf(flights.get(airport)) > max) {
                     max = Double.valueOf(flights.get(airport));
                 }
             }
-          for (String airport : airportsSorted) {
-                if (Double.valueOf(flights.get(airport)) == max) {
-                    System.out.println("MAX FLIGHTS " + flights.get(airport)
+            String multi="False";
+            for (String airport : airportsSorted) {
+                if (Double.valueOf(
+                        flights.get(airport)) == max && multi == "False") {
+                    System.out.print("MAX FLIGHTS " + flights.get(airport)
                             + " : " + airport);
+                    multi = "True";
+                }
+                else if(Double.valueOf(
+                        flights.get(airport)) == max) {
+                    System.out.print(' ' + airport);
                 }
             }
-        }
-          else if(args[1].equals("LIMIT")){
-          HashMap<String, Integer> flights = countLimit(in);
+        } else if (args[1].equals("LIMIT")) {
+            HashMap<String, Integer> flights = countLimit(in);
             ArrayList<String> airportsSorted = new ArrayList<String>(
                     flights.keySet());
             Collections.sort(airportsSorted);
             for (String airport : airportsSorted) {
-            if (Double.valueOf(flights.get(airport)) > Double
+                if (Double.valueOf(flights.get(airport)) > Double
                         .valueOf(args[2])) {
                     System.out.println(airport + " - " + flights.get(airport));
                 }
             }
-          }
-          else {
+        } else {
             HashMap<String, String> flights = countDepartures(in);
             ArrayList<String> airportsSorted = new ArrayList<String>(
                     flights.keySet());
             Collections.sort(airportsSorted);
             for (String airport : airportsSorted) {
+                String[] str = flights.get(airport).split(" ");
+
+                Set<String> targetSet = new HashSet<String>(
+                        Arrays.asList(str));
+                String[] targetArray = targetSet
+                        .toArray(new String[targetSet.size()]);
+                Arrays.sort(targetArray);
+                StringBuilder builder = new StringBuilder();
+                for (String value : targetArray) {
+                    builder.append(' ');
+                    builder.append(value);
+                }
+                String text = builder.toString();
                 System.out
-                        .println(airport + " flys to " + flights.get(airport));
+                        .println(airport + " flys to" + text);
             }
         }
-
-
-        
     }
 
-    /*
-     * function: countDepartures(Scanner in)
-     *
-     * parameter in: in Scanner is used to loop over input file
-     * 
-     * This function loops over the input file to create a HashMap
-     * that maps from airport codes to number of flights.
-     * 
-     * returns: HashMap<String, Integer> that was created
-     */
-    public static HashMap<String, Integer> countMax(Scanner in) {
+    public static HashMap<String, Integer> countMax(Scanner in, String[] args) {
         HashMap<String, Integer> airportToNumFlights = new HashMap<String, Integer>();
         // Skips the first line of the input file as it is just descriptions
         String str = in.nextLine();
+
         while (in.hasNextLine()) {
             String[] temp = in.nextLine().split(",");
             if (airportToNumFlights.get(temp[4]) != null) {
@@ -91,6 +102,26 @@ public class PA2Main {
                         airportToNumFlights.get(temp[4]) + 1);
             } else {
                 airportToNumFlights.put(temp[4], 1);
+            }
+        }
+        in.close();
+        Scanner in2 = null;
+        try {
+            in2 = new Scanner(new File(args[0]));
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        String str2 = in2.nextLine();
+
+        while (in2.hasNextLine()) {
+            String[] temp = in2.nextLine().split(",");
+            if (airportToNumFlights.get(temp[2]) != null) {
+                airportToNumFlights.put(temp[2],
+                        airportToNumFlights.get(temp[2]) + 1);
+            } else {
+                airportToNumFlights.put(temp[2], 1);
             }
         }
         return airportToNumFlights;
@@ -117,13 +148,16 @@ public class PA2Main {
         HashMap<String, String> airportToNumFlights = new HashMap<String, String>();
         // Skips the first line of the input file as it is just descriptions
         String str = in.nextLine();
+        HashSet<String> h = new HashSet<String>();
         while (in.hasNextLine()) {
             String[] temp = in.nextLine().split(",");
-            if (airportToNumFlights.get(temp[2]) != null) {
+            if (airportToNumFlights.get(temp[2]) != null
+            ) {
                 airportToNumFlights.put(temp[2],
                         airportToNumFlights.get(temp[2]) + " " + temp[4]);
             } else {
                 airportToNumFlights.put(temp[2], temp[4]);
+                // h.add(temp[4]);
             }
         }
         return airportToNumFlights;
