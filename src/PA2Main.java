@@ -1,4 +1,30 @@
 
+/*
+ * INSTRUCTIONS
+ * 
+ * This program can determine the
+ * MAX - This function prints the airport with the maximum number of total
+ * flights. The total flights includes both arriving and departing flights for
+ * each airport.
+ * 
+ * DEPARTURES - The goal of this function is to print an alphabetical list of
+ * all destinations an airport flies to.
+ * 
+ * LIMIT - The limit function requires an additional integer argument on the
+ * command line. This integer is used as a cut off to eliminate airports that
+ * have a total number of flights less than or equal to the limit.
+ * 
+ * For a CSV file of flight data with input in the following format
+ * 
+ * CSV file with form(
+ * airline airline ID source airport source airport id destination airport
+ * destination airport id codeshare stops equipment)
+ * MAX, LIMIT, or DEPARTURES
+ * An integer only necessary for use with limit
+ * 
+ * Written By Nicholas Hernandez
+ */
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -10,91 +36,127 @@ import java.util.Scanner;
 import java.util.Set;
 
 public class PA2Main {
-
-    private static final boolean False = false;
-
+    // Processes the input file and calls the calculation function
     public static void main(String[] args) throws FileNotFoundException {
-        // TODO: write Scanner declaration here
+        // Initializes scanner
         Scanner in = null;
         try {
             in = new Scanner(new File(args[0]));
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
-        // Stores the HashMap created by countDepartures for later printing
-        //HashMap<String, Integer> flights;
+        // Calls the method that does the calculations and printing
         calcPrint(args, in);
-
     }
 
+    // Calculates and prints the a hash map depending on input MAX,
+    // DEPARTURES, or LIMIT input
     public static void calcPrint(String[] args, Scanner in) {
         if (args[1].equals("MAX")) {
-            HashMap<String, Integer> flights = countMax(in, args);
-            ArrayList<String> airportsSorted = new ArrayList<String>(
-                    flights.keySet());
-            Collections.sort(airportsSorted);
-            double max = 1;
-            for (String airport : airportsSorted) {
-                if (Double.valueOf(flights.get(airport)) > max) {
-                    max = Double.valueOf(flights.get(airport));
-                }
+            printMax(args, in);
             }
-            String multi="False";
-            for (String airport : airportsSorted) {
-                if (Double.valueOf(
-                        flights.get(airport)) == max && multi == "False") {
-                    System.out.print("MAX FLIGHTS " + flights.get(airport)
-                            + " : " + airport);
-                    multi = "True";
-                }
-                else if(Double.valueOf(
-                        flights.get(airport)) == max) {
-                    System.out.print(' ' + airport);
-                }
-            }
-        } else if (args[1].equals("LIMIT")) {
-            HashMap<String, Integer> flights = countLimit(in);
-            ArrayList<String> airportsSorted = new ArrayList<String>(
-                    flights.keySet());
-            Collections.sort(airportsSorted);
-            for (String airport : airportsSorted) {
-                if (Double.valueOf(flights.get(airport)) > Double
-                        .valueOf(args[2])) {
-                    System.out.println(airport + " - " + flights.get(airport));
-                }
-            }
-        } else {
-            HashMap<String, String> flights = countDepartures(in);
-            ArrayList<String> airportsSorted = new ArrayList<String>(
-                    flights.keySet());
-            Collections.sort(airportsSorted);
-            for (String airport : airportsSorted) {
-                String[] str = flights.get(airport).split(" ");
+        else if (args[1].equals("LIMIT")) {
+            printLimit(args, in);
 
-                Set<String> targetSet = new HashSet<String>(
-                        Arrays.asList(str));
-                String[] targetArray = targetSet
-                        .toArray(new String[targetSet.size()]);
-                Arrays.sort(targetArray);
-                StringBuilder builder = new StringBuilder();
-                for (String value : targetArray) {
-                    builder.append(' ');
-                    builder.append(value);
-                }
-                String text = builder.toString();
-                System.out
-                        .println(airport + " flys to" + text);
+        } else {
+            // If the user did not input MAX or LIMIT then it must be DEPARTURES
+            printDepartures(args, in);
+        }
+    }
+
+    // Prints the airports with the max amount of flights
+    public static void printMax(String[] args, Scanner in) {
+        // Creates the hash map for the airports and their total number of
+        // flights
+        HashMap<String, Integer> flights = countMaxLimit(in, args);
+
+        // Sorts the airlines alphabetically
+        ArrayList<String> airportsSorted = new ArrayList<String>(
+            flights.keySet());
+        Collections.sort(airportsSorted);
+
+        // Finds the max number of flights with a minimum of 1
+        double max = 1;
+        for (String airport : airportsSorted) {
+            if (Double.valueOf(flights.get(airport)) > max) {
+                max = Double.valueOf(flights.get(airport));
+        }
+    }
+        // Multi is used for output formatting past the first print statement
+        String multi = "False";
+        // Prints the airports that match the maximum amount of flights
+        for (String airport : airportsSorted) {
+            if (Double.valueOf(flights.get(airport)) == max
+                    && multi == "False") {
+                System.out.print("MAX FLIGHTS " + flights.get(airport) + " : "
+                        + airport);
+            multi = "True";
+        }
+            // If this iteration is not the first print, no new line is output
+        else if(Double.valueOf(
+                flights.get(airport)) == max) {
+            System.out.print(' ' + airport);
+        }
+        }
+    }
+
+    // Prints the airports with a number of flights above a user input number
+    public static void printLimit(String[] args, Scanner in) {
+        // Creates the hashmap for the total flights each airline has
+        HashMap<String, Integer> flights = countMaxLimit(in, args);
+        // Sorts the airlines alphabetically
+        ArrayList<String> airportsSorted = new ArrayList<String>(
+                flights.keySet());
+        Collections.sort(airportsSorted);
+
+        // Prints the airlines that have a total flight number above a user's
+        // input number
+        for (String airport : airportsSorted) {
+            if (Double.valueOf(flights.get(airport)) > Double
+                    .valueOf(args[2])) {
+                System.out.println(airport + " - " + flights.get(airport));
             }
         }
     }
 
-    public static HashMap<String, Integer> countMax(Scanner in, String[] args) {
+    // Prints from where and to where for the departures
+    public static void printDepartures(String[] args, Scanner in) {
+        // Creates the hashmap for where each flight is going to and from where
+        HashMap<String, String> flights = countDepartures(in);
+        // Sorts the from where for the airlines alphabetically
+        ArrayList<String> airportsSorted = new ArrayList<String>(
+                flights.keySet());
+        Collections.sort(airportsSorted);
+
+        // Prints the departing flights in alphabetical order
+        for (String airport : airportsSorted) {
+            // Sorts the to where for the airlines alphabetically and eliminates
+            // duplicates
+            String[] str = flights.get(airport).split(" ");
+            Set<String> finalSet = new HashSet<String>(Arrays.asList(str));
+            String[] finalArray = finalSet.toArray(new String[finalSet.size()]);
+            Arrays.sort(finalArray);
+
+            // Converts the sorted array to a string in the proper format
+            StringBuilder strbuilder = new StringBuilder();
+            for (String value : finalArray) {
+                strbuilder.append(' ');
+                strbuilder.append(value);
+            }
+            String towhere = strbuilder.toString();
+            System.out.println(airport + " flys to" + towhere);
+        }
+    }
+
+    // Calculates and returns the number of incoming and outgoing flights for
+    // max and limit
+    public static HashMap<String, Integer> countMaxLimit(Scanner in,
+            String[] args) {
+        // A hashmap that maps destinations to their occurrences
         HashMap<String, Integer> airportToNumFlights = new HashMap<String, Integer>();
         // Skips the first line of the input file as it is just descriptions
         String str = in.nextLine();
-
+        // Loops through the file collecting destination flights
         while (in.hasNextLine()) {
             String[] temp = in.nextLine().split(",");
             if (airportToNumFlights.get(temp[4]) != null) {
@@ -104,17 +166,17 @@ public class PA2Main {
                 airportToNumFlights.put(temp[4], 1);
             }
         }
+        // Resets the scanner to get the source flights
         in.close();
         Scanner in2 = null;
         try {
             in2 = new Scanner(new File(args[0]));
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
+        // Skips the first line as it is just descriptions
         String str2 = in2.nextLine();
-
+        // Loops through the file collecting source flights
         while (in2.hasNextLine()) {
             String[] temp = in2.nextLine().split(",");
             if (airportToNumFlights.get(temp[2]) != null) {
@@ -127,37 +189,21 @@ public class PA2Main {
         return airportToNumFlights;
     }
 
-    public static HashMap<String, Integer> countLimit(Scanner in) {
-        HashMap<String, Integer> airportToNumFlights = new HashMap<String, Integer>();
-        // Skips the first line of the input file as it is just descriptions
-        String str = in.nextLine();
-        while (in.hasNextLine()) {
-            String[] temp = in.nextLine().split(",");
-
-            if (airportToNumFlights.get(temp[4]) != null) {
-                airportToNumFlights.put(temp[4],
-                        airportToNumFlights.get(temp[4]) + 1);
-            } else {
-                airportToNumFlights.put(temp[4], 1);
-            }
-        }
-        return airportToNumFlights;
-    }
-
+    // Calcuslates and returns the departures for a set of flight data
     public static HashMap<String, String> countDepartures(Scanner in) {
+        // Maps source airports to destination airports
         HashMap<String, String> airportToNumFlights = new HashMap<String, String>();
         // Skips the first line of the input file as it is just descriptions
         String str = in.nextLine();
-        HashSet<String> h = new HashSet<String>();
+
+        // Collects the flights
         while (in.hasNextLine()) {
             String[] temp = in.nextLine().split(",");
-            if (airportToNumFlights.get(temp[2]) != null
-            ) {
+            if (airportToNumFlights.get(temp[2]) != null) {
                 airportToNumFlights.put(temp[2],
                         airportToNumFlights.get(temp[2]) + " " + temp[4]);
             } else {
                 airportToNumFlights.put(temp[2], temp[4]);
-                // h.add(temp[4]);
             }
         }
         return airportToNumFlights;
