@@ -138,12 +138,10 @@ public class PA2Main {
             Arrays.sort(finalArray);
 
             // Converts the sorted array to a string in the proper format
-            StringBuilder strbuilder = new StringBuilder();
-            for (String value : finalArray) {
-                strbuilder.append(' ');
-                strbuilder.append(value);
-            }
-            String towhere = strbuilder.toString();
+            String str2 = Arrays.toString(finalArray);
+            String towhere = str2.substring(1, str2.length() - 1).replace(",",
+                    "");
+
             System.out.println(airport + " flys to" + towhere);
         }
     }
