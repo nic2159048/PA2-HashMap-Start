@@ -56,8 +56,15 @@ public class PA2Main {
             }
           }
           else {
-          HashMap<String, Integer> flights = countDepartures(in);
-          }
+            HashMap<String, String> flights = countDepartures(in);
+            ArrayList<String> airportsSorted = new ArrayList<String>(
+                    flights.keySet());
+            Collections.sort(airportsSorted);
+            for (String airport : airportsSorted) {
+                System.out
+                        .println(airport + " flys to " + flights.get(airport));
+            }
+        }
 
 
         
@@ -106,18 +113,17 @@ public class PA2Main {
         return airportToNumFlights;
     }
 
-    public static HashMap<String, Integer> countDepartures(Scanner in) {
-        HashMap<String, Integer> airportToNumFlights = new HashMap<String, Integer>();
-        // Skipes the first line of the input file as it is just descriptions
+    public static HashMap<String, String> countDepartures(Scanner in) {
+        HashMap<String, String> airportToNumFlights = new HashMap<String, String>();
+        // Skips the first line of the input file as it is just descriptions
         String str = in.nextLine();
         while (in.hasNextLine()) {
             String[] temp = in.nextLine().split(",");
-            // System.out.println(temp[4]);
             if (airportToNumFlights.get(temp[2]) != null) {
                 airportToNumFlights.put(temp[2],
-                        airportToNumFlights.get(temp[2]) + 1);
+                        airportToNumFlights.get(temp[2]) + " " + temp[4]);
             } else {
-                airportToNumFlights.put(temp[2], 1);
+                airportToNumFlights.put(temp[2], temp[4]);
             }
         }
         return airportToNumFlights;
